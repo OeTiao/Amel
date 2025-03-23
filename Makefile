@@ -1,19 +1,12 @@
 CC = clang
 CFLAGS = -I./include -D_CRT_SECURE_NO_WARNINGS
 
-SRC = $(wildcard src/*.c) 
-OBJ = $(SRC:src/%.c=obj/%.o)  
-OUT = bin/shell.exe
+SRC = $(wildcard src/*.c)  
+OUT = bin/shell.exe  
 
-
-$(OUT): $(OBJ)
+$(OUT): $(SRC)
 	@if not exist bin mkdir bin
-	@if not exist obj mkdir obj
-	$(CC) -o $(OUT) $(OBJ)
-
-
-obj/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -o $(OUT) $(SRC)
 
 clean:
-	rm -f $(OBJ) $(OUT)
+	rm -f $(OUT)
