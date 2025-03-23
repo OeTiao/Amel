@@ -39,7 +39,7 @@ size_t advance_f(size_t *i, char *src, char *curr_char, size_t *line, size_t *co
 
 void tokens_pushback_f(token value, token **tokens, size_t *initialized_tokens, size_t *tokens_capacity, size_t line, size_t column, size_t index) {
     if ((*tokens_capacity) == (*initialized_tokens)) {
-        *tokens_capacity *= 2;
+        *tokens_capacity += sizeof(token) * 25;
         *tokens = realloc(*tokens, sizeof(token) * (*tokens_capacity));  
         if (*tokens == NULL) {
             perror("Unable to expand the array of tokens.");
@@ -70,7 +70,7 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
     #define advance() advance_f(&i, src, &curr_char, &line, &column)
     #define tokens_pushback() tokens_pushback_f(curr_token, &tokens, &initialized_tokens, &tokens_capacity, line, column, i)
     while (src[i] != '\0') {
-        
+        curr_token.value = "";
         curr_char = src[i];
 
         switch(curr_char) {
@@ -232,7 +232,6 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                 break;
         
             default:
-                
                 if (isalpha(curr_char)) {
                     char token_val[71] = {0}; 
                     size_t last_idx = 0;
@@ -277,10 +276,8 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                         }
                     }
                     tokens_pushback();
-                    curr_token.value = "";
                 } 
                 else if (curr_char >= '0' && curr_char <= '9') {
-                   
                     size_t dot_count = 0;
                     char token_val[21] = {0}; 
                     size_t last_idx = 0;
@@ -317,11 +314,12 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                 
                         
                        
-                        token_val[last_idx] = '\0';
-                        curr_token.value = _strdup(token_val);
-                        curr_token.type = NUMBER;
                     }
+                    token_val[last_idx] = '\0';
+                    curr_token.value = _strdup(token_val);
+                    curr_token.type = NUMBER;
                     tokens_pushback();
+                    
                 } else if (curr_char == '"') {
                     size_t str_idx = 0;
                     size_t max_str_len = 1023;
