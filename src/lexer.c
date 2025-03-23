@@ -4,6 +4,20 @@
 #include <string.h>  
 #include <ctype.h>
 
+
+static const char *keywords[] =
+{
+    "if",
+    "else",
+    "elseif",
+    "local",
+    "while",
+    "true",
+    "false",
+    "fn",
+    "\0" // End of the keywords
+};
+
 size_t advance_f(size_t *i, char *src, char *curr_char, size_t *line, size_t *column) {
     if (src[*i + 1] != '\0') {
         (*i)++;  
@@ -55,10 +69,10 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
     char curr_char;
     #define advance() advance_f(&i, src, &curr_char, &line, &column)
     #define tokens_pushback() tokens_pushback_f(curr_token, &tokens, &initialized_tokens, &tokens_capacity, line, column, i)
-    while (src[i] != '\0' && src[i+1] != '\0') {
+    while (src[i] != '\0') {
         
         curr_char = src[i];
-        
+
         switch(curr_char) {
             case '+':
                 if (src[i + 1] == '=') {
@@ -199,6 +213,7 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                 break;
         
             case '}':
+                printf("ue percebeu");
                 curr_token.value = "}";
                 curr_token.type = RBRACE;
                 tokens_pushback();
@@ -216,16 +231,9 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                 tokens_pushback();
                 break;
         
-            case '\0':
-                curr_token.value = "EOF";
-                curr_token.type = AMEL_EOF;
-                tokens_pushback();
-                break;
-        
             default:
                 
                 if (isalpha(curr_char)) {
-                    
                     char token_val[71] = {0}; 
                     size_t last_idx = 0;
                     
@@ -246,7 +254,7 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                         last_idx++;
                         
                         while (isalnum(src[i+1])) {
-
+                            
                             if (last_idx == 70) {
                                 printf("Error at index %zu, column %zu and line %zu: identifier is too long. Maximum size is 70 characters.", 
                                         i+1, column, line);
@@ -258,11 +266,18 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                         }
                 
 
-                        token_val[last_idx] = '\0';
-                        curr_token.value = _strdup(token_val);
-                        curr_token.type = IDENTIFIER;
+                    }
+                    token_val[last_idx] = '\0';
+                    curr_token.value = _strdup(token_val);
+                    curr_token.type = IDENTIFIER;
+                    for(size_t i = 0; keywords[i][0] != '\0'; i++) {
+                        if(strcmp(curr_token.value, keywords[i]) == 0) {
+                            curr_token.type = KEYWORD;
+                            break;
+                        }
                     }
                     tokens_pushback();
+                    curr_token.value = "";
                 } 
                 else if (curr_char >= '0' && curr_char <= '9') {
                    
@@ -281,13 +296,13 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                 
                         while (src[i+1] >= '0' && src[i+1] <= '9' || src[i+1] == '.' && src[i+1] != '\0') {
                             
-                            if (src[i+1] == '.' && dot_count > 0) {
-                                printf("Error at index %zu, column %zu and line %zu: number is too long. Maximum size is 20 characters.", 
-                                    i+1, column, line);
-                                return NULL;
-                            }
                             if (src[i+1] == '.') {
                                 dot_count++;
+                                if(dot_count > 0) {
+                                    printf("Error at index %zu, column %zu and line %zu: decimal number has more than 1 dot.", 
+                                        i+1, column, line);
+                                    return NULL;
+                                }
                             }
                             if (last_idx >= 20) {  
                                 printf("Error at index %zu, column %zu and line %zu: number is too long. Maximum size is 20 characters.", 
@@ -307,13 +322,54 @@ token *tokenize(char *src, size_t *initialized_tokens_ptr) {
                         curr_token.type = NUMBER;
                     }
                     tokens_pushback();
-                } else if(curr_char == '"') {
+                } else if (curr_char == '"') {
+                    size_t str_idx = 0;
+                    size_t max_str_len = 1023;
+                    char *string_val = malloc(max_str_len + 1);  
+                
+                    if (string_val == NULL) {
+                        printf("Error at index %zu, column %zu and line %zu: memory allocation failed for string.\n", i, column, line);
+                        return NULL;
+                    }
+                
+                    advance(); 
                     
+                    while (src[i] != '"' && src[i] != '\0') {
+                        if (str_idx >= max_str_len) {
+                            printf("Error at index %zu, column %zu and line %zu: string is too long. Maximum size is 1023 characters.\n", 
+                                   i, column, line);
+                            free(string_val);
+                            return NULL;
+                        }
+                        string_val[str_idx++] = curr_char;
+                        advance();
+                    }
+                
+                    if (src[i] == '\0') {
+                        printf("Error at index %zu, column %zu and line %zu: string not closed properly.\n", i, column, line);
+                        free(string_val);
+                        return NULL;
+                    }
+                
+                    
+                    advance();
+                
+                    string_val[str_idx] = '\0'; 
+                
+                    curr_token.value = _strdup(string_val); 
+                    curr_token.type = STRING; 
+                    free(string_val); 
+                
+                    tokens_pushback(); 
                 }
+                
                 
                 break;
         }
-        advance();
+
+        if (advance() == 1)
+            break;
+        
         
     }
     *initialized_tokens_ptr = initialized_tokens;

@@ -1,1 +1,4 @@
-oiiiiiiiiiiiiiiiiiiiiiiii = 101231231312234252342334123152341231231200;
+local a = 10;
+if "a" == a {
+    print(a += 3);
+}

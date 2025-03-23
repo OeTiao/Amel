@@ -34,12 +34,13 @@ int main(int argc, const char** argv) {
 
         size_t tokens_len = 0;
         token *tokens = tokenize(main_source_code, &tokens_len);
+        //printf("\nEPA %s\n", tokens[1].value);
         for(size_t i = 0; i < tokens_len; i++) {
             //printf("oi %zu", i);
-            printf("\nValue: %s \tType: %d\n", tokens[i].value, tokens[i].type);
+            printf("Value: %s \tType: %d\n", tokens[i].value, tokens[i].type);
         }
         for(size_t i = 0; i < tokens_len; i++) {
-            if(tokens[i].type == IDENTIFIER || tokens[i].type == NUMBER) {
+            if(tokens[i].type == IDENTIFIER || tokens[i].type == NUMBER || tokens[i].type == STRING) {
                 free(tokens[i].value);
             }
         }

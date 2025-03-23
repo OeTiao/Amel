@@ -1,5 +1,5 @@
-#ifndef TOKEN
-#define TOKEN
+#pragma once
+
 
 typedef enum {
     IDENTIFIER,
@@ -42,15 +42,4 @@ typedef struct {
     char *value;
     size_t index, line, column;
 } token;
-const char *keywords[] = 
-{
-    "if",
-    "else",
-    "elseif",
-    "local",
-    "while",
-    "true",
-    "false",
-    "fn",
-};
-#endif
+
