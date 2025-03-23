@@ -3,6 +3,6 @@
 #include "token.h"
 #include <stddef.h>
 #include <string.h>
-size_t tokenize(char *src, token **tokens_ptr);
+token *tokenize(char *src, size_t *initialized_tokens_ptr);
 
 #endif

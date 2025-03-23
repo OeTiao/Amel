@@ -3,14 +3,7 @@
 
 typedef enum {
     IDENTIFIER,
-    IF,
-    LOCAL,
-    WHILE,
-    END,
-    FN,
-    ELSE,
-    ELSEIF,
-    RETURN,
+    KEYWORD,
     PLUS,
     MINUS,
     MUL,
@@ -28,6 +21,7 @@ typedef enum {
     NOT_EQ,
     AND,
     MOD,
+    MOD_EQ,
     OR,
     STRING,
     NIL,
@@ -46,5 +40,17 @@ typedef enum {
 typedef struct {
     TOT type;
     char *value;
+    size_t index, line, column;
 } token;
+const char *keywords[] = 
+{
+    "if",
+    "else",
+    "elseif",
+    "local",
+    "while",
+    "true",
+    "false",
+    "fn",
+};
 #endif
